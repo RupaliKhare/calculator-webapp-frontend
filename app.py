@@ -1,14 +1,26 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 
+@app.route('/')
+def index():
+    return render_template('index.html')
+
 @app.route('/calculate', methods=['POST'])
 def calculate():
-    num1 = request.get_json()['num1']
-    num2 = request.get_json()['num2']
-    operator = request.get_json()['operator']
+    if not request.is_json:
+        return jsonify({'error': 'Request must be JSON'}), 400
+
+    data = request.get_json()
+    
+    try:
+        num1 = float(data['num1'])
+        num2 = float(data['num2'])
+        operator = data['operator']
+    except (KeyError, ValueError):
+        return jsonify({'error': 'Invalid input data'}), 400
 
     if operator == 'add':
         result = num1 + num2
